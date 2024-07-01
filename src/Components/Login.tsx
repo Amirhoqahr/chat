@@ -12,8 +12,8 @@ const Login = (props: Props) => {
         <Input type="email" name="Email"></Input>
         <Input type="password" name="Password"></Input>
         <Input type="password" name="Password again"></Input>
-        <Button text="login"></Button>
-        <Button text="register" secondary></Button>
+        <Button text="login" loading></Button>
+        <Button text="register" secondary loading></Button>
       </div>
     </div>
   );
