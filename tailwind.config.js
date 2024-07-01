@@ -7,6 +7,9 @@ module.exports = {
         myBlue: "#0A32B3",
         myPink: "#BD365D",
         myYellow: "#FFDF00",
+      },
+      backgroundImage: {
+        'pattern': "url('img/bg.jpg')",
       }
     },
   },
