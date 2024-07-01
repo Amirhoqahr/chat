@@ -5,7 +5,7 @@ type ButtonProps = {
   text: string;
   className?: string;
   secondary?: boolean;
-  onClick?: (e: any) => {};
+  onClick?: (e: any) => void;
   loading?: boolean;
 };
 
