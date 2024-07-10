@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Button from "./button";
 import Input from "./input";
+import { BE_signUp } from "../Backend/Queries";
 
 type Props = {};
 
@@ -10,10 +11,10 @@ const Login = (props: Props) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const LoginButtonFunction = () => {
-    console.log(email, password, confirmPassword);
+    // BE_signUp(email, password, confirmPassword);
   };
   const RegisterButtonFunction = () => {
-    console.log(email, password, confirmPassword);
+    BE_signUp(email, password, confirmPassword);
   };
   return (
     <div className="w-full md:w-[450px]">
