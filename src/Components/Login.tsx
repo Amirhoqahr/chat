@@ -10,11 +10,12 @@ const Login = (props: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [signUpLoading, setSignUpLoading] = useState(false);
   const LoginButtonFunction = () => {
     // BE_signUp(email, password, confirmPassword);
   };
   const RegisterButtonFunction = () => {
-    BE_signUp(email, password, confirmPassword);
+    BE_signUp(email, password, confirmPassword, setSignUpLoading);
   };
   return (
     <div className="w-full md:w-[450px]">
@@ -43,7 +44,11 @@ const Login = (props: Props) => {
 
         {login ? (
           <>
-            <Button text="Login" onClick={LoginButtonFunction}></Button>
+            <Button
+              text="Login"
+              onClick={LoginButtonFunction}
+              loading={signUpLoading}
+            ></Button>
             <Button
               text="go to the Register page"
               onClick={() => setLogin(false)}
@@ -52,7 +57,11 @@ const Login = (props: Props) => {
           </>
         ) : (
           <>
-            <Button text="Register" onClick={RegisterButtonFunction}></Button>
+            <Button
+              text="Register"
+              onClick={RegisterButtonFunction}
+              loading={signUpLoading}
+            ></Button>
             <Button
               text="go to the Login page"
               onClick={() => setLogin(true)}
