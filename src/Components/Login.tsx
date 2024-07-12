@@ -15,7 +15,12 @@ const Login = (props: Props) => {
     // BE_signUp(email, password, confirmPassword);
   };
   const RegisterButtonFunction = () => {
-    BE_signUp(email, password, confirmPassword, setSignUpLoading);
+    BE_signUp(email, password, confirmPassword, setSignUpLoading, reset);
+  };
+  const reset = () => {
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
   };
   return (
     <div className="w-full md:w-[450px]">

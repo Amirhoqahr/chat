@@ -4,7 +4,7 @@ import CatchErr from "../utils/catchErr";
 import {auth} from "./firebase";
 import { setLoadingType } from "../Types";
 
-export const BE_signUp = (email:string, password:string, confirmPassword:string, setLoading:setLoadingType) => {
+export const BE_signUp = (email: string, password: string, confirmPassword: string, setLoading: setLoadingType, reset: () => void) => {
     if (email && password && confirmPassword) {
         if (password == confirmPassword) {
             setLoading(true)
