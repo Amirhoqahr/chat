@@ -12,6 +12,7 @@ export const BE_signUp = (email: string, password: string, confirmPassword: stri
             .then((userCredential) => {
                 // Signed up
                 const user = userCredential.user;
+                toast.success("Account created successfully")
                 setLoading(false);
                 reset();
 
@@ -35,6 +36,7 @@ export const BE_signIn = (email: string, password: string, setLoading: setLoadin
     .then((userCredential) => {
         // Signed up
         const user = userCredential.user;
+        toast.success("Logged in successfully")
         setLoading(false);
         reset();
 
