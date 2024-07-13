@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut  } from "firebase/auth";
 import CatchErr from "../utils/catchErr";
 import {auth} from "./firebase";
 import { setLoadingType } from "../Types";
@@ -12,7 +12,8 @@ export const BE_signUp = (email: string, password: string, confirmPassword: stri
             .then((userCredential) => {
                 // Signed up
                 const user = userCredential.user;
-                setLoading(false)
+                setLoading(false);
+                reset();
 
             })
             .catch((error) => {
@@ -27,3 +28,19 @@ export const BE_signUp = (email: string, password: string, confirmPassword: stri
         toast.error("Fields shouldn't be empty")
     }
 };
+
+export const BE_signIn = (email: string, password: string, setLoading: setLoadingType, reset: () => void) => {
+    setLoading(true)
+    createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+        // Signed up
+        const user = userCredential.user;
+        setLoading(false);
+        reset();
+
+    })
+    .catch((error) => {
+        CatchErr(error)
+        setLoading(false)
+    })
+}

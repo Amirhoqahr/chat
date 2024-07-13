@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Button from "./button";
 import Input from "./input";
-import { BE_signUp } from "../Backend/Queries";
+import { BE_signIn, BE_signUp } from "../Backend/Queries";
 
 type Props = {};
 
@@ -12,7 +12,7 @@ const Login = (props: Props) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [signUpLoading, setSignUpLoading] = useState(false);
   const LoginButtonFunction = () => {
-    // BE_signUp(email, password, confirmPassword);
+    BE_signIn(email, password, setSignUpLoading, reset);
   };
   const RegisterButtonFunction = () => {
     BE_signUp(email, password, confirmPassword, setSignUpLoading, reset);
