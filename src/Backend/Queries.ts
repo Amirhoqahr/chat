@@ -3,8 +3,9 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut  } 
 import CatchErr from "../utils/catchErr";
 import {auth} from "./firebase";
 import { setLoadingType } from "../Types";
+import { NavigateFunction } from "react-router-dom";
 
-export const BE_signUp = (email: string, password: string, confirmPassword: string, setLoading: setLoadingType, reset: () => void) => {
+export const BE_signUp = (email: string, password: string, confirmPassword: string, setLoading: setLoadingType, reset: () => void, goTo: NavigateFunction) => {
     if (email && password && confirmPassword) {
         if (password == confirmPassword) {
             setLoading(true)
@@ -15,6 +16,7 @@ export const BE_signUp = (email: string, password: string, confirmPassword: stri
                 toast.success("Account created successfully")
                 setLoading(false);
                 reset();
+                goTo("/dashboard")
 
             })
             .catch((error) => {
@@ -30,7 +32,7 @@ export const BE_signUp = (email: string, password: string, confirmPassword: stri
     }
 };
 
-export const BE_signIn = (email: string, password: string, setLoading: setLoadingType, reset: () => void) => {
+export const BE_signIn = (email: string, password: string, setLoading: setLoadingType, reset: () => void, goTo: NavigateFunction) => {
     setLoading(true)
     createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
@@ -39,6 +41,7 @@ export const BE_signIn = (email: string, password: string, setLoading: setLoadin
         toast.success("Logged in successfully")
         setLoading(false);
         reset();
+        goTo("/dashboard")
 
     })
     .catch((error) => {
