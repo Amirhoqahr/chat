@@ -12,6 +12,7 @@ const Login = (props: Props) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [signUpLoading, setSignUpLoading] = useState(false);
+  const [signInLoading, setSignInLoading] = useState(false);
   const goTo = useNavigate();
   const LoginButtonFunction = () => {
     BE_signIn(email, password, setSignUpLoading, reset, goTo);
