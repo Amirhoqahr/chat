@@ -1,51 +1,126 @@
 import { toast } from "react-toastify";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut  } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import CatchErr from "../utils/catchErr";
-import {auth} from "./firebase";
-import { setLoadingType } from "../Types";
+import { auth, db } from "./firebase";
+import { setLoadingType, userType } from "../Types";
 import { NavigateFunction } from "react-router-dom";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { defaultUser, setUser } from "../Redux/userSlice";
+import { AppDispatch } from "../Redux/store";
 
-export const BE_signUp = (email: string, password: string, confirmPassword: string, setLoading: setLoadingType, reset: () => void, goTo: NavigateFunction) => {
-    if (email && password && confirmPassword) {
-        if (password == confirmPassword) {
-            setLoading(true)
-            createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                // Signed up
-                const user = userCredential.user;
-                toast.success("Account created successfully")
-                setLoading(false);
-                reset();
-                goTo("/dashboard")
+// Collection Names
+const userColl = "users";
 
-            })
-            .catch((error) => {
-                CatchErr(error)
-                setLoading(false)
-            });
-        } else {
-            // console.log("password and confirm don't match")
-            toast.error("password and confirm don't match")
-        }
+// register a user
+export const BE_signUp = (
+  email: string,
+  password: string,
+  confirmPassword: string,
+  setLoading: setLoadingType,
+  reset: () => void,
+  goTo: NavigateFunction,
+  dispatch: AppDispatch
+) => {
+  if (email && password && confirmPassword) {
+    if (password == confirmPassword) {
+      setLoading(true);
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Signed up
+          // TODO: create user image
+          const user = userCredential.user;
+          toast.success("Account created successfully");
+          setLoading(false);
+          reset();
+          goTo("/dashboard");
+          const userInfo = addUserToCollection(
+            user.uid,
+            user.email || "",
+            user.email?.split("@")[0] || "",
+            "Image Link"
+          );
+          // TODO: set user info in store and local storage
+          dispatch(setUser);
+        })
+        .catch((error) => {
+          CatchErr(error);
+          setLoading(false);
+        });
     } else {
-        toast.error("Fields shouldn't be empty")
+      // console.log("password and confirm don't match")
+      toast.error("password and confirm don't match");
     }
+  } else {
+    toast.error("Fields shouldn't be empty");
+  }
 };
 
-export const BE_signIn = (email: string, password: string, setLoading: setLoadingType, reset: () => void, goTo: NavigateFunction) => {
-    setLoading(true)
-    createUserWithEmailAndPassword(auth, email, password)
+// login a user
+export const BE_signIn = (
+  email: string,
+  password: string,
+  setLoading: setLoadingType,
+  reset: () => void,
+  goTo: NavigateFunction,
+  dispatch: AppDispatch
+) => {
+  setLoading(true);
+  signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-        // Signed up
-        const user = userCredential.user;
-        toast.success("Logged in successfully")
-        setLoading(false);
-        reset();
-        goTo("/dashboard")
+      // get user information
+      const user = userCredential.user;
+      const userInfo = getUserData(user.uid); // const user = userCredential.user; رو اشتباهی بعدش گذاشته بودی
 
+      toast.success("Logged in successfully");
+      setLoading(false);
+      reset();
+      goTo("/dashboard");
     })
     .catch((error) => {
-        CatchErr(error)
-        setLoading(false)
-    })
+      CatchErr(error);
+      setLoading(false);
+    });
+};
+
+async function addUserToCollection(
+  id: string,
+  email: string,
+  username: string,
+  img: string
+) {
+  await setDoc(doc(db, userColl, "id"), {
+    isOnline: true,
+    img,
+    username,
+    email,
+    creationTime: serverTimestamp(),
+    lastSeen: serverTimestamp(),
+    bio: "My Bio",
+  });
+  return getUserData(id);
+}
+
+async function getUserData(id: string): Promise<userType> {
+  const docRef = doc(db, userColl, id);
+  const theUser = await getDoc(docRef);
+  if (theUser.exists()) {
+    const { img, isOnline, username, email, bio, creationTime, lastSeen } =
+      theUser.data();
+    return {
+      id: theUser.id,
+      img,
+      isOnline,
+      username,
+      email,
+      bio,
+      creationTime,
+      lastSeen,
+    };
+  } else {
+    return defaultUser;
+  }
 }
