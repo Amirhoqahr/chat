@@ -9,3 +9,9 @@ export type userType = {
   creationTime?: string;
   lastSeen?: string;
 };
+
+export type authDataType = {
+  email: string;
+  password: string;
+  confirmPassword?: string;
+};
