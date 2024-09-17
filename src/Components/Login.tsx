@@ -5,6 +5,7 @@ import { BE_signIn, BE_signUp } from "../Backend/Queries";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
+import { authDataType } from "../Types";
 const dispatch = useDispatch<AppDispatch>();
 
 type Props = {};
@@ -18,19 +19,22 @@ const Login = (props: Props) => {
   const [signInLoading, setSignInLoading] = useState(false);
   const goTo = useNavigate();
   const LoginButtonFunction = () => {
-    BE_signIn(email, password, setSignUpLoading, reset, goTo, dispatch);
+    const data = { email, password };
+    auth(data, BE_signIn, setSignInLoading);
   };
   const RegisterButtonFunction = () => {
-    BE_signUp(
-      email,
-      password,
-      confirmPassword,
-      setSignUpLoading,
-      reset,
-      goTo,
-      dispatch
-    );
+    const data = { email, password, confirmPassword };
+    auth(data, BE_signUp, setSignUpLoading);
   };
+
+  const auth = (
+    data: authDataType,
+    func: any,
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    func(data, setLoading, reset, goTo, dispatch);
+  };
+
   const reset = () => {
     setEmail("");
     setPassword("");
@@ -66,7 +70,7 @@ const Login = (props: Props) => {
             <Button
               text="Login"
               onClick={LoginButtonFunction}
-              loading={signUpLoading}
+              loading={signInLoading}
             ></Button>
             <Button
               text="go to the Register page"
