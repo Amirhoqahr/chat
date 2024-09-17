@@ -6,7 +6,7 @@ import {
 } from "firebase/auth";
 import CatchErr from "../utils/catchErr";
 import { auth, db } from "./firebase";
-import { setLoadingType, userType } from "../Types";
+import { authDataType, setLoadingType, userType } from "../Types";
 import { NavigateFunction } from "react-router-dom";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { defaultUser, setUser } from "../Redux/userSlice";
@@ -17,14 +17,14 @@ const userColl = "users";
 
 // register a user
 export const BE_signUp = (
-  email: string,
-  password: string,
-  confirmPassword: string,
+  data: authDataType,
   setLoading: setLoadingType,
   reset: () => void,
   goTo: NavigateFunction,
   dispatch: AppDispatch
 ) => {
+  const { email, password, confirmPassword } = data;
+
   if (email && password && confirmPassword) {
     if (password == confirmPassword) {
       setLoading(true);
@@ -61,19 +61,19 @@ export const BE_signUp = (
 
 // login a user
 export const BE_signIn = (
-  email: string,
-  password: string,
+  data: authDataType,
   setLoading: setLoadingType,
   reset: () => void,
   goTo: NavigateFunction,
   dispatch: AppDispatch
 ) => {
+  const { email, password } = data;
   setLoading(true);
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // get user information
       const user = userCredential.user;
-      const userInfo = getUserData(user.uid); // const user = userCredential.user; رو اشتباهی بعدش گذاشته بودی
+      const userInfo = getUserData(user.uid);
 
       toast.success("Logged in successfully");
       setLoading(false);
