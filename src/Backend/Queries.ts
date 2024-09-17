@@ -29,7 +29,7 @@ export const BE_signUp = (
     if (password == confirmPassword) {
       setLoading(true);
       createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           // Signed up
           // TODO: create user image
           const user = userCredential.user;
@@ -37,7 +37,7 @@ export const BE_signUp = (
           setLoading(false);
           reset();
           goTo("/dashboard");
-          const userInfo = addUserToCollection(
+          const userInfo = await addUserToCollection(
             user.uid,
             user.email || "",
             user.email?.split("@")[0] || "",
@@ -70,10 +70,10 @@ export const BE_signIn = (
   const { email, password } = data;
   setLoading(true);
   signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
+    .then(async (userCredential) => {
       // get user information
       const user = userCredential.user;
-      const userInfo = getUserData(user.uid);
+      const userInfo = await getUserData(user.uid);
 
       toast.success("Logged in successfully");
       setLoading(false);
@@ -92,6 +92,7 @@ async function addUserToCollection(
   username: string,
   img: string
 ) {
+  //create user with userID
   await setDoc(doc(db, userColl, "id"), {
     isOnline: true,
     img,
