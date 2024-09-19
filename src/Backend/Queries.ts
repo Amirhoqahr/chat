@@ -12,6 +12,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { defaultUser, setUser } from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import ConvertTime from "../utils/convertTime";
+import AvatarGenerator from "../utils/avatar";
 
 // Collection Names
 const userColl = "users";
@@ -38,11 +39,12 @@ export const BE_signUp = (
           setLoading(false);
           reset();
           goTo("/dashboard");
+          const username = user.email?.split("@")[0] || "";
           const userInfo = await addUserToCollection(
             user.uid,
             user.email || "",
-            user.email?.split("@")[0] || "",
-            "Image Link"
+            username,
+            AvatarGenerator(username) //img
           );
           // TODO: set user info in store and local storage
           dispatch(setUser);
