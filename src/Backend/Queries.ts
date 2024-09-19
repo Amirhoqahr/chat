@@ -11,6 +11,7 @@ import { NavigateFunction } from "react-router-dom";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { defaultUser, setUser } from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
+import ConvertTime from "../utils/convertTime";
 
 // Collection Names
 const userColl = "users";
@@ -118,8 +119,12 @@ async function getUserData(id: string): Promise<userType> {
       username,
       email,
       bio,
-      creationTime,
-      lastSeen,
+      creationTime: creationTime
+        ? ConvertTime(creationTime.toDate)
+        : "no date yet: userInfo",
+      lastSeen: lastSeen
+        ? ConvertTime(lastSeen.toDate)
+        : "no date yet: userInfo",
     };
   } else {
     return defaultUser;
