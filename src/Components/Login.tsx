@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
 import { authDataType } from "../Types";
-const dispatch = useDispatch<AppDispatch>();
 
 type Props = {};
 
@@ -18,6 +17,7 @@ const Login = (props: Props) => {
   const [signUpLoading, setSignUpLoading] = useState(false);
   const [signInLoading, setSignInLoading] = useState(false);
   const goTo = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const LoginButtonFunction = () => {
     const data = { email, password };
     auth(data, BE_signIn, setSignInLoading);
