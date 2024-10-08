@@ -89,6 +89,7 @@ export const BE_signIn = (
     });
 };
 
+// add user to collection
 async function addUserToCollection(
   id: string,
   email: string,
@@ -108,6 +109,7 @@ async function addUserToCollection(
   return getUserData(id);
 }
 
+// get user information
 async function getUserData(id: string): Promise<userType> {
   const docRef = doc(db, userColl, id);
   const theUser = await getDoc(docRef);
@@ -132,3 +134,29 @@ async function getUserData(id: string): Promise<userType> {
     return defaultUser;
   }
 }
+
+// update user info
+const updateUserInfo = async ({
+  id,
+  username,
+  img,
+  isOnline,
+}: {
+  id?: string;
+  username?: string;
+  img?: string;
+  isOnline?: boolean;
+}) => {
+  if (!id) {
+    id = "";
+  }
+  if (id) {
+    id = getStorageUser().id;
+  }
+};
+
+const getStorageUser = () => {
+  const user = localStorage.getItem("superhero_user");
+  if (user) return JSON.parse("user");
+  else return null;
+};
