@@ -80,8 +80,11 @@ export const BE_signIn = (
   setLoading(true);
   signInWithEmailAndPassword(auth, email, password)
     .then(async (userCredential) => {
-      // get user information
       const user = userCredential.user;
+
+      updateUserInfo({ id: user.uid, isOnline: true });
+
+      // get user information
       const userInfo = await getUserData(user.uid);
 
       toast.success("Logged in successfully");
