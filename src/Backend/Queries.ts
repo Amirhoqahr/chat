@@ -8,7 +8,13 @@ import CatchErr from "../utils/catchErr";
 import { auth, db } from "./firebase";
 import { authDataType, setLoadingType, userType } from "../Types";
 import { NavigateFunction } from "react-router-dom";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { defaultUser, setUser } from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import ConvertTime from "../utils/convertTime";
@@ -148,10 +154,15 @@ const updateUserInfo = async ({
   isOnline?: boolean;
 }) => {
   if (!id) {
-    id = "";
+    id = getStorageUser().id;
   }
   if (id) {
-    id = getStorageUser().id;
+    await updateDoc(doc(db, userColl, id), {
+      ...(username && { username }),
+      ...(img && { img }),
+      ...(isOnline && { isOnline }),
+      lastSeen: serverTimestamp(),
+    });
   }
 };
 
