@@ -147,11 +147,13 @@ const updateUserInfo = async ({
   username,
   img,
   isOnline,
+  isOffline,
 }: {
   id?: string;
   username?: string;
   img?: string;
   isOnline?: boolean;
+  isOffline?: boolean;
 }) => {
   if (!id) {
     id = getStorageUser().id;
@@ -161,6 +163,7 @@ const updateUserInfo = async ({
       ...(username && { username }),
       ...(img && { img }),
       ...(isOnline && { isOnline }),
+      ...(isOffline && { isOnline: false }),
       lastSeen: serverTimestamp(),
     });
   }
