@@ -1,6 +1,11 @@
 import React from "react";
 import logo from "../Assets/img/logo.png";
 import Button from "./button";
+import AddListBoard from "./AddListBoard";
+import Icon from "./Icons";
+import { BsFillChatFill } from "react-icons/bs";
+import { FiList } from "react-icons/fi";
+
 type Props = {};
 
 function Header({}: Props) {
@@ -11,7 +16,11 @@ function Header({}: Props) {
         alt="img not found"
         className="w-[50px] drop-shadow-md cursor-pointer"
       />
-      <Button text="Add new ListBoard"></Button>
+      <div className="flex flex-row-reverse md:flex-row items-center justify-center gap-5 flex-wrap">
+        <AddListBoard />
+        <Icon IconName={BsFillChatFill} ping={true} />
+        <Icon IconName={FiList} />
+      </div>
     </div>
   );
 }
