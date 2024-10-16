@@ -162,6 +162,7 @@ const updateUserInfo = async ({
     id = getStorageUser().id;
   }
   if (id) {
+    console.log(db, userColl, id);
     await updateDoc(doc(db, userColl, id), {
       ...(username && { username }),
       ...(img && { img }),
