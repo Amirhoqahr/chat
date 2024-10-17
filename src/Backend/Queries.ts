@@ -53,7 +53,8 @@ export const BE_signUp = (
             AvatarGenerator(username) //img
           );
           // TODO: set user info in store and local storage
-          dispatch(setUser);
+          // dispatch(setUser);
+          dispatch(setUser(userInfo));
         })
         .catch((error) => {
           CatchErr(error);
@@ -106,6 +107,7 @@ async function addUserToCollection(
   img: string
 ) {
   //create user with userID
+  // await setDoc(doc(db, userColl, "id"), {
   await setDoc(doc(db, userColl, "id"), {
     isOnline: true,
     img,
