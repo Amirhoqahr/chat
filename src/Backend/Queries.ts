@@ -107,8 +107,8 @@ async function addUserToCollection(
   img: string
 ) {
   //create user with userID
-  // await setDoc(doc(db, userColl, "id"), {
-  await setDoc(doc(db, userColl, "id"), {
+  // await setDoc(doc(db, userColl, "id"), { // bug...
+  await setDoc(doc(db, userColl, id), {
     isOnline: true,
     img,
     username,
