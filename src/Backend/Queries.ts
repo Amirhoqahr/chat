@@ -54,7 +54,7 @@ export const BE_signUp = (
           );
           // TODO: set user info in store and local storage
           // dispatch(setUser);
-          dispatch(setUser(userInfo));
+          dispatch(setUser(userInfo)); // بفرست تو رداکس
         })
         .catch((error) => {
           CatchErr(error);
@@ -87,6 +87,7 @@ export const BE_signIn = (
 
       // get user information
       const userInfo = await getUserData(user.uid);
+      dispatch(setUser(userInfo)); // بفرست تو رداکس
 
       toast.success("Logged in successfully");
       setLoading(false);
@@ -160,11 +161,12 @@ const updateUserInfo = async ({
   isOnline?: boolean;
   isOffline?: boolean;
 }) => {
+  // console.log("to log in: ", id);
   if (!id) {
     id = getStorageUser().id;
   }
   if (id) {
-    console.log(db, userColl, id);
+    // console.log("Logged in", id);
     await updateDoc(doc(db, userColl, id), {
       ...(username && { username }),
       ...(img && { img }),
