@@ -6,10 +6,22 @@ import Icon from "./Icons";
 import { BsFillChatFill } from "react-icons/bs";
 import { FiList } from "react-icons/fi";
 import UserHeaderProfile from "./UserHeaderProfile";
+import { useDispatch, useSelector } from "react-redux";
+import { start } from "repl";
+import { RootState } from "../Redux/store";
+import { Link } from "react-router-dom";
+import { BE_signOut } from "../Backend/Queries";
 
 type Props = {};
 
 function Header({}: Props) {
+  const dispatch = useDispatch();
+  const handleSignOut = () => {
+    BE_signOut(dispatch);
+  };
+
+  // get the current User from Redux
+  const currentUser = useSelector((state: RootState) => state.user.currentUser);
   return (
     <div className="flex fles-wrap sm:flex-row gap-5 items-center justify-between bg-gradient-to-r from-violet-500 border-t-orange-500 px-5 py-5 md:py-2">
       <img
@@ -21,7 +33,26 @@ function Header({}: Props) {
         <AddListBoard />
         <Icon IconName={BsFillChatFill} ping={true} />
         <Icon IconName={FiList} />
-        <UserHeaderProfile />
+        <div className="group relative">
+          <UserHeaderProfile user={currentUser} />
+          <div className="absolute pt-5 hidden group-hover:block w-full min-w-max">
+            <ul className="w-full bg-white overflow-hidden rounded-md shadow-md text-gray-700 pt-1 pb-1">
+              <Link
+                to={"/dashboard/profile"}
+                className="block hover:bg-gray-200 py-2 px-4"
+              >
+                Profile
+              </Link>
+              <Link
+                to={"/"}
+                onClick={handleSignOut}
+                className="block hover:bg-gray-200 py-2 px-4"
+              >
+                Log out
+              </Link>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );

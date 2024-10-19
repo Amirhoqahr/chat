@@ -15,7 +15,7 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { defaultUser, setUser } from "../Redux/userSlice";
+import { defaultUser, setUser, userStorageName } from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import ConvertTime from "../utils/convertTime";
 import AvatarGenerator from "../utils/avatar";
@@ -98,6 +98,17 @@ export const BE_signIn = (
       CatchErr(error);
       setLoading(false);
     });
+};
+
+// logout a user
+export const BE_signOut = (dispatch: AppDispatch) => {
+  signOut(auth);
+
+  updateUserInfo({ isOffline: true });
+
+  dispatch(setUser(defaultUser));
+
+  localStorage.removeItem(userStorageName);
 };
 
 // add user to collection
@@ -184,7 +195,7 @@ const updateUserInfo = async ({
 };
 
 const getStorageUser = () => {
-  const user = localStorage.getItem("superhero_user");
+  const user = localStorage.getItem(userStorageName);
   if (user) return JSON.parse("user");
   else return null;
 };
