@@ -128,6 +128,12 @@ async function getUserData(id: string): Promise<userType> {
   if (theUser.exists()) {
     const { img, isOnline, username, email, bio, creationTime, lastSeen } =
       theUser.data();
+    // console.log(
+    //   creationTime,
+    //   lastSeen,
+    //   creationTime.toDate(),
+    //   lastSeen.toDate()
+    // );
     return {
       id: theUser.id,
       img,
@@ -136,10 +142,10 @@ async function getUserData(id: string): Promise<userType> {
       email,
       bio,
       creationTime: creationTime
-        ? ConvertTime(creationTime.toDate)
+        ? ConvertTime(creationTime.toDate())
         : "no date yet: userInfo",
       lastSeen: lastSeen
-        ? ConvertTime(lastSeen.toDate)
+        ? ConvertTime(lastSeen.toDate())
         : "no date yet: userInfo",
     };
   } else {
