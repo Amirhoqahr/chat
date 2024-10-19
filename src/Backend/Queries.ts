@@ -196,6 +196,6 @@ const updateUserInfo = async ({
 
 const getStorageUser = () => {
   const user = localStorage.getItem(userStorageName);
-  if (user) return JSON.parse("user");
+  if (user) return JSON.parse(user);
   else return null;
 };
