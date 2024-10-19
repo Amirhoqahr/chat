@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "../Assets/img/logo.png";
 import Button from "./button";
 import AddListBoard from "./AddListBoard";
@@ -11,13 +11,15 @@ import { start } from "repl";
 import { RootState } from "../Redux/store";
 import { Link } from "react-router-dom";
 import { BE_signOut } from "../Backend/Queries";
+import Spinner from "./Spinner";
 
 type Props = {};
 
 function Header({}: Props) {
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const dispatch = useDispatch();
   const handleSignOut = () => {
-    BE_signOut(dispatch);
+    BE_signOut(dispatch, setLogoutLoading);
   };
 
   // get the current User from Redux
@@ -45,10 +47,11 @@ function Header({}: Props) {
               </Link>
               <Link
                 to={"/"}
-                onClick={handleSignOut}
-                className="block hover:bg-gray-200 py-2 px-4"
+                onClick={() => !logoutLoading && handleSignOut()}
+                className={`hover:bg-gray-200 py-2 px-4 flex items-center gap-4`}
               >
                 Log out
+                {logoutLoading && <Spinner />}
               </Link>
             </ul>
           </div>

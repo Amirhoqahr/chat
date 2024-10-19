@@ -19,6 +19,7 @@ import { defaultUser, setUser, userStorageName } from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import ConvertTime from "../utils/convertTime";
 import AvatarGenerator from "../utils/avatar";
+import { error } from "console";
 
 // Collection Names
 const userColl = "users";
@@ -101,14 +102,19 @@ export const BE_signIn = (
 };
 
 // logout a user
-export const BE_signOut = (dispatch: AppDispatch) => {
-  signOut(auth);
-
-  updateUserInfo({ isOffline: true });
-
-  dispatch(setUser(defaultUser));
-
-  localStorage.removeItem(userStorageName);
+export const BE_signOut = (
+  dispatch: AppDispatch,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+  signOut(auth)
+    .then(async () => {
+      await updateUserInfo({ isOffline: true });
+      dispatch(setUser(defaultUser));
+      localStorage.removeItem(userStorageName);
+      setLoading(false);
+    })
+    .catch((error) => CatchErr(error));
 };
 
 // add user to collection
