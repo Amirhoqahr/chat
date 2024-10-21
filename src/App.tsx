@@ -12,11 +12,12 @@ function App() {
     <div>
       <BrowserRouter>
         <Routes>
-          <Route path="" element={<LoginPage />}></Route>
+          <Route path="/auth" element={<LoginPage />}></Route>
           <Route path="/dashboard" element={<Layout />}>
             <Route index element={<ListPage />}></Route>
             <Route path="chat" element={<ChatPage />}></Route>
             <Route path="profile" element={<ProfilePage />}></Route>
+            <Route path="list" element={<ListPage />}></Route>
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" />}></Route>
         </Routes>
