@@ -104,14 +104,23 @@ export const BE_signIn = (
 // logout a user
 export const BE_signOut = (
   dispatch: AppDispatch,
+  goTo: NavigateFunction,
   setLoading: setLoadingType
 ) => {
   setLoading(true);
   signOut(auth)
     .then(async () => {
       await updateUserInfo({ isOffline: true });
+
+      // set currentSelected user to empty user
       dispatch(setUser(defaultUser));
+
+      // remove from local storage
       localStorage.removeItem(userStorageName);
+
+      // route to auth page
+      goTo("/auth");
+
       setLoading(false);
     })
     .catch((error) => CatchErr(error));
