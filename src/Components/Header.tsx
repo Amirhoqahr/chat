@@ -9,7 +9,7 @@ import UserHeaderProfile from "./UserHeaderProfile";
 import { useDispatch, useSelector } from "react-redux";
 import { start } from "repl";
 import { RootState } from "../Redux/store";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BE_signOut } from "../Backend/Queries";
 import Spinner from "./Spinner";
 
@@ -19,10 +19,12 @@ function Header({}: Props) {
   const goTo = useNavigate();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const dispatch = useDispatch();
+  // get the current User from Redux
+  const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
   useEffect(() => {
-    return () => {};
-  });
+    if (!currentUser?.id) goTo("/");
+  }, [goTo, currentUser]);
 
   const handleSignOut = () => {
     BE_signOut(dispatch, goTo, setLogoutLoading);
@@ -39,8 +41,6 @@ function Header({}: Props) {
     setCurrentPage(page);
   };
 
-  // get the current User from Redux
-  const currentUser = useSelector((state: RootState) => state.user.currentUser);
   return (
     <div className="flex fles-wrap sm:flex-row gap-5 items-center justify-between bg-gradient-to-r from-violet-500 border-t-orange-500 px-5 py-5 md:py-2">
       <img
@@ -104,13 +104,13 @@ function Header({}: Props) {
               >
                 Profile
               </p>
-              <p
+              <span
                 onClick={() => !logoutLoading && handleSignOut()}
-                className={`hover:bg-gray-200 py-2 px-4 flex items-center gap-4`}
+                className={`hover:bg-gray-200 py-2 px-4 flex items-center gap-4 hover:cursor-pointer`}
               >
                 Log out
                 {logoutLoading && <Spinner />}
-              </p>
+              </span>
             </ul>
           </div>
         </div>

@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  onAuthStateChanged,
 } from "firebase/auth";
 import CatchErr from "../utils/catchErr";
 import { auth, db } from "./firebase";
@@ -102,20 +103,24 @@ export const BE_signIn = (
 };
 
 // logout a user
-export const BE_signOut = (
+export const BE_signOut = async (
   dispatch: AppDispatch,
   goTo: NavigateFunction,
   setLoading: setLoadingType
 ) => {
   setLoading(true);
+  // logout in firebase
+
+  // it must be before signOut because in Firebase Rules we have seid that only
+  // authenticated users may read/write collections, so after signOut will lose
+  // user's auth so updateUserInfo will fail
+  await updateUserInfo({ isOffline: true });
   signOut(auth)
     .then(async () => {
-      await updateUserInfo({ isOffline: true });
-
       // set currentSelected user to empty user
       dispatch(setUser(defaultUser));
 
-      // remove from local storage
+      // // remove from local storage
       localStorage.removeItem(userStorageName);
 
       // route to auth page
@@ -123,7 +128,13 @@ export const BE_signOut = (
 
       setLoading(false);
     })
-    .catch((error) => CatchErr(error));
+    .catch((err) => CatchErr(err));
+};
+
+export const getStorageUser = () => {
+  const user = localStorage.getItem(userStorageName);
+  if (user) return JSON.parse(user);
+  else return null;
 };
 
 // add user to collection
@@ -209,8 +220,14 @@ const updateUserInfo = async ({
   }
 };
 
-const getStorageUser = () => {
-  const user = localStorage.getItem(userStorageName);
-  if (user) return JSON.parse(user);
-  else return null;
-};
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User is signed in
+    console.log("User is signed in:", user.uid);
+    console.log("auth:    ", auth);
+    // Access user data (e.g., user.email, user.displayName)
+  } else {
+    // User is signed out
+    console.log("User is signed out");
+  }
+});
