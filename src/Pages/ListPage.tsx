@@ -7,7 +7,12 @@ function ListPage({}: Props) {
   return (
     <div className="p-10">
       ListPage
-      <SingleTaskList />
+      <div className="flex flex-wrap justify-center gap-10">
+        <SingleTaskList />
+        <SingleTaskList />
+        <SingleTaskList />
+        <SingleTaskList />
+      </div>
     </div>
   );
 }
