@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "../Assets/img/logo.png";
 import Button from "./button";
 import AddListBoard from "./AddListBoard";
@@ -19,8 +19,13 @@ function Header({}: Props) {
   const goTo = useNavigate();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    return () => {};
+  });
+
   const handleSignOut = () => {
-    BE_signOut(dispatch, setLogoutLoading);
+    BE_signOut(dispatch, goTo, setLogoutLoading);
   };
 
   const setCurrentPage = (page: string) => {
@@ -99,14 +104,13 @@ function Header({}: Props) {
               >
                 Profile
               </p>
-              <Link
-                to={"/"}
+              <p
                 onClick={() => !logoutLoading && handleSignOut()}
                 className={`hover:bg-gray-200 py-2 px-4 flex items-center gap-4`}
               >
                 Log out
                 {logoutLoading && <Spinner />}
-              </Link>
+              </p>
             </ul>
           </div>
         </div>

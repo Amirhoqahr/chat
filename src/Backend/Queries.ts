@@ -119,7 +119,7 @@ export const BE_signOut = (
       localStorage.removeItem(userStorageName);
 
       // route to auth page
-      goTo("/auth");
+      goTo("/");
 
       setLoading(false);
     })
