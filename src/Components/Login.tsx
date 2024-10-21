@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "./button";
 import Input from "./input";
-import { BE_signIn, BE_signUp } from "../Backend/Queries";
+import { BE_signIn, BE_signUp, getStorageUser } from "../Backend/Queries";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
 import { authDataType } from "../Types";
+import { setUser } from "../Redux/userSlice";
 
 type Props = {};
 
@@ -18,6 +19,14 @@ const Login = (props: Props) => {
   const [signInLoading, setSignInLoading] = useState(false);
   const goTo = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const usr = getStorageUser();
+  useEffect(() => {
+    if (usr?.id) {
+      dispatch(setUser(usr));
+      goTo("/dashboard");
+    }
+  }, []);
+
   const LoginButtonFunction = () => {
     const data = { email, password };
     auth(data, BE_signIn, setSignInLoading);
