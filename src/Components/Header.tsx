@@ -10,8 +10,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { start } from "repl";
 import { RootState } from "../Redux/store";
 import { useNavigate } from "react-router-dom";
-import { BE_signOut } from "../Backend/Queries";
+import { BE_signOut, getStorageUser } from "../Backend/Queries";
 import Spinner from "./Spinner";
+import { setUser } from "../Redux/userSlice";
 
 type Props = {};
 
@@ -22,19 +23,33 @@ function Header({}: Props) {
   // get the current User from Redux
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
+  const usr = getStorageUser();
   useEffect(() => {
-    if (!currentUser?.id) goTo("/");
-  }, [goTo, currentUser]);
+    if (usr?.id) {
+      dispatch(setUser(usr));
+    } else {
+      goTo("/auth");
+    }
+  }, [dispatch, goTo]);
+
+  useEffect(() => {
+    // const page = getCurrentPage();
+    // if (page) goTo("/dashboard/" + page);
+    // const get = async () => {
+    //   if (usr?.id) await BE_getChats(dispatch);
+    // };
+    // get();
+  }, [goTo]);
 
   const handleSignOut = () => {
     BE_signOut(dispatch, goTo, setLogoutLoading);
   };
 
-  const setCurrentPage = (page: string) => {
-    localStorage.setItem("superhero-page", page);
-  };
   const getCurrentPage = () => {
     return localStorage.getItem("superhero-page");
+  };
+  const setCurrentPage = (page: string) => {
+    localStorage.setItem("superhero-page", page);
   };
   const handleGoToPage = (page: string) => {
     goTo("/dashboard/" + page);
@@ -52,53 +67,41 @@ function Header({}: Props) {
         {getCurrentPage() === "chat" ? (
           <Icon
             IconName={FiList}
-            onClick={() => {
-              handleGoToPage("list");
-            }}
+            onClick={() => handleGoToPage("list")}
+            reduceOpacityOnHover={false}
           />
         ) : getCurrentPage() === "profile" ? (
           <>
-            {/* fragment cuz we have 2 elements to put in */}
             <Icon
+              reduceOpacityOnHover={false}
               IconName={FiList}
-              onClick={() => {
-                handleGoToPage("list");
-              }}
+              onClick={() => handleGoToPage("list")}
             />
             <Icon
               IconName={BsFillChatFill}
-              ping={true}
-              onClick={() => {
-                handleGoToPage("chat");
-              }}
+              ping={false}
+              onClick={() => handleGoToPage("chat")}
+              reduceOpacityOnHover={false}
             />
           </>
         ) : (
           <>
-            {/* fragment cuz we have 3 elements to put in */}
             <AddListBoard />
             <Icon
               IconName={BsFillChatFill}
-              ping={true}
-              onClick={() => {
-                handleGoToPage("chat");
-              }}
-            />
-            <Icon
-              IconName={FiList}
-              onClick={() => {
-                handleGoToPage("list");
-              }}
+              ping={false}
+              onClick={() => handleGoToPage("chat")}
+              reduceOpacityOnHover={false}
             />
           </>
         )}
         <div className="group relative">
-          <UserHeaderProfile user={currentUser} />
+          {currentUser && <UserHeaderProfile user={currentUser} />}
           <div className="absolute pt-5 hidden group-hover:block w-full min-w-max">
             <ul className="w-full bg-white overflow-hidden rounded-md shadow-md text-gray-700 pt-1 pb-1">
               <p
                 onClick={() => {
-                  handleGoToPage("/profile");
+                  handleGoToPage("profile");
                 }}
                 className="block hover:bg-gray-200 py-2 px-4 hover:cursor-pointer"
               >
