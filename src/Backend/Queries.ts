@@ -7,9 +7,11 @@ import {
 } from "firebase/auth";
 import CatchErr from "../utils/catchErr";
 import { auth, db } from "./firebase";
-import { authDataType, setLoadingType, userType } from "../Types";
+import { authDataType, setLoadingType, taskListType, userType } from "../Types";
 import { NavigateFunction } from "react-router-dom";
 import {
+  addDoc,
+  collection,
   doc,
   getDoc,
   serverTimestamp,
@@ -20,10 +22,11 @@ import { defaultUser, setUser, userStorageName } from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import ConvertTime from "../utils/convertTime";
 import AvatarGenerator from "../utils/avatar";
-import { error } from "console";
+import { addTaskList, defaultTaskList } from "../Redux/taskListSlice";
 
 // Collection Names
 const userColl = "users";
+const taskListCol = "users";
 
 // register a user
 export const BE_signUp = (
@@ -36,7 +39,7 @@ export const BE_signUp = (
   const { email, password, confirmPassword } = data;
 
   if (email && password && confirmPassword) {
-    if (password == confirmPassword) {
+    if (password === confirmPassword) {
       setLoading(true);
       createUserWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
@@ -231,3 +234,30 @@ onAuthStateChanged(auth, (user) => {
     console.log("User is signed out");
   }
 });
+
+// --------------------------- TASK LIST ----------------------------------
+
+export const BE_addTaskList = async (
+  dispatch: AppDispatch,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+  const { title } = defaultTaskList;
+  const list = await addDoc(collection(db, taskListCol), {
+    title,
+    userId: getStorageUser().id,
+  });
+
+  const newDocSnap = await getDoc(doc(db, list.path));
+  if (newDocSnap.exists()) {
+    const newlyAddedDocument: taskListType = {
+      id: newDocSnap.id,
+      title: newDocSnap.data().title,
+    };
+    dispatch(addTaskList(newlyAddedDocument));
+    setLoading(false);
+  } else {
+    toast.error("BE_addTaskList: no such doc");
+    setLoading(false);
+  }
+};
