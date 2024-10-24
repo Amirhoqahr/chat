@@ -33,7 +33,7 @@ import {
 
 // Collection Names
 const userColl = "users";
-const taskListCol = "taskList";
+const taskListColl = "taskList";
 
 // register a user
 export const BE_signUp = (
@@ -250,7 +250,7 @@ export const BE_addTaskList = async (
 ) => {
   setLoading(true);
   const { title } = defaultTaskList;
-  const list = await addDoc(collection(db, taskListCol), {
+  const list = await addDoc(collection(db, taskListColl), {
     title,
     userId: getStorageUser().id,
   });
@@ -274,20 +274,35 @@ export const BE_getTaskList = async (
   setLoading: setLoadingType
 ) => {
   setLoading(true);
-  const taskList = getAllTaskList();
-  // dispatch(setTaskList,)
-  setLoading(false);
+  const id = getStorageUser().id;
+  if (id) {
+    // get user task list
+    const taskList = await getAllTaskList();
+    console.log("getAllTaskList", taskList);
+
+    dispatch(setTaskList(taskList));
+    setLoading(false);
+  }
 };
 
+// get all users taskList
 const getAllTaskList = async () => {
-  const q = query(
-    collection(db, taskListCol),
-    where("userId", "==", getStorageUser().id)
-  );
+  const id = getStorageUser().id;
+  const q = query(collection(db, taskListColl), where("userId", "==", id));
 
-  const taskListSnapShot = await getDocs(q);
-  taskListSnapShot.forEach((doc) => {
-    // doc.data() is never undefined for query doc snapshots
-    console.log(doc.id, " => ", doc.data());
+  const taskListSnapshot = await getDocs(q);
+  const taskList: taskListType[] = [];
+
+  taskListSnapshot.forEach((doc) => {
+    const { title } = doc.data();
+    // console.log("getAllTaskList", doc.id, title);
+    taskList.push({
+      id: doc.id,
+      title,
+      editMode: false,
+      tasks: [],
+    });
   });
+
+  return taskList;
 };
