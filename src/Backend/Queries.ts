@@ -14,15 +14,22 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { defaultUser, setUser, userStorageName } from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import ConvertTime from "../utils/convertTime";
 import AvatarGenerator from "../utils/avatar";
-import { addTaskList, defaultTaskList } from "../Redux/taskListSlice";
+import {
+  addTaskList,
+  defaultTaskList,
+  setTaskList,
+} from "../Redux/taskListSlice";
 
 // Collection Names
 const userColl = "users";
@@ -260,4 +267,27 @@ export const BE_addTaskList = async (
     toast.error("BE_addTaskList: no such doc");
     setLoading(false);
   }
+};
+
+export const BE_getTaskList = async (
+  dispatch: AppDispatch,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+  const taskList = getAllTaskList();
+  // dispatch(setTaskList,)
+  setLoading(false);
+};
+
+const getAllTaskList = async () => {
+  const q = query(
+    collection(db, taskListCol),
+    where("userId", "==", getStorageUser().id)
+  );
+
+  const taskListSnapShot = await getDocs(q);
+  taskListSnapShot.forEach((doc) => {
+    // doc.data() is never undefined for query doc snapshots
+    console.log(doc.id, " => ", doc.data());
+  });
 };
