@@ -4,6 +4,7 @@ import { BE_getTaskList } from "../Backend/Queries";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../Redux/store";
 import ListLoader from "../Components/Loaders";
+import FlipMove from "react-flip-move";
 
 type Props = {};
 
@@ -21,11 +22,11 @@ function ListPage({}: Props) {
       {loading ? (
         <ListLoader />
       ) : (
-        <div className="flex flex-wrap justify-center gap-10">
+        <FlipMove className="flex flex-wrap justify-center gap-10">
           {taskList.map((t) => (
             <SingleTaskList key={t.id} singleTaskList={t} />
           ))}
-        </div>
+        </FlipMove>
       )}
     </div>
   );
