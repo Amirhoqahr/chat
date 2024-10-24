@@ -33,7 +33,7 @@ import {
 
 // Collection Names
 const userColl = "users";
-const taskListCol = "users";
+const taskListCol = "taskList";
 
 // register a user
 export const BE_signUp = (
