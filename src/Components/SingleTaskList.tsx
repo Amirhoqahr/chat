@@ -25,7 +25,6 @@ function SingleTaskList({ singleTaskList }: Props) {
         IconName={MdAdd}
         className="absolute -mt-6 -ml-4 p-3 dropshadow-lg hover:bg-myPink"
         reduceOpacityOnHover={false}
-        loading
       ></Icon>
     </div>
   );

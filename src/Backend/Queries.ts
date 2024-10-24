@@ -273,9 +273,9 @@ export const BE_getTaskList = async (
   dispatch: AppDispatch,
   setLoading: setLoadingType
 ) => {
-  setLoading(true);
   const id = getStorageUser().id;
   if (id) {
+    setLoading(true);
     // get user task list
     const taskList = await getAllTaskList();
     console.log("getAllTaskList", taskList);
