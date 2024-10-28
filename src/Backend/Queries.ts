@@ -7,11 +7,18 @@ import {
 } from "firebase/auth";
 import CatchErr from "../utils/catchErr";
 import { auth, db } from "./firebase";
-import { authDataType, setLoadingType, taskListType, userType } from "../Types";
+import {
+  authDataType,
+  setLoadingType,
+  taskListType,
+  taskType,
+  userType,
+} from "../Types";
 import { NavigateFunction } from "react-router-dom";
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -28,13 +35,17 @@ import AvatarGenerator from "../utils/avatar";
 import {
   addTaskList,
   defaultTaskList,
+  deleteTaskList,
   saveTaskListTitle,
   setTaskList,
 } from "../Redux/taskListSlice";
 
 // Collection Names
-const userColl = "users";
+const usersColl = "users";
+const tasksColl = "tasks";
 const taskListColl = "taskList";
+const chatsColl = "chats";
+const messagesColl = "messages";
 
 // register a user
 export const BE_signUp = (
@@ -157,7 +168,7 @@ async function addUserToCollection(
 ) {
   //create user with userID
   // await setDoc(doc(db, userColl, "id"), { // bug...
-  await setDoc(doc(db, userColl, id), {
+  await setDoc(doc(db, usersColl, id), {
     isOnline: true,
     img,
     username,
@@ -171,7 +182,7 @@ async function addUserToCollection(
 
 // get user information
 async function getUserData(id: string): Promise<userType> {
-  const docRef = doc(db, userColl, id);
+  const docRef = doc(db, usersColl, id);
   const theUser = await getDoc(docRef);
   if (theUser.exists()) {
     const { img, isOnline, username, email, bio, creationTime, lastSeen } =
@@ -221,7 +232,7 @@ const updateUserInfo = async ({
   }
   if (id) {
     // console.log("Logged in", id);
-    await updateDoc(doc(db, userColl, id), {
+    await updateDoc(doc(db, usersColl, id), {
       ...(username && { username }),
       ...(img && { img }),
       ...(isOnline && { isOnline }),
@@ -301,7 +312,51 @@ export const BE_saveTaskList = async (
   setLoading(false);
 };
 
-// get all users taskList
+export const BE_deleteTaskList = async (
+  listId: string,
+  tasks: taskType[],
+  dispatch: AppDispatch,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+
+  // FireBase does NOT automatically delete the subcollections so we have to do that manually
+  // looping through tasks and deleting each
+  if (tasks.length > 0) {
+    for (let i = 0; i < tasks.length; i++) {
+      const { id } = tasks[i];
+      if (id) BE_deleteTask(listId, id, dispatch);
+    }
+  }
+
+  // delete task list board
+  const listRef = doc(db, taskListColl, listId);
+  await deleteDoc(listRef);
+  const deletedTaskList = await getDoc(listRef); // make sure
+  if (!deletedTaskList.exists()) {
+    dispatch(deleteTaskList(listId));
+    setLoading(false);
+  }
+};
+
+export const BE_deleteTask = async (
+  listId: string,
+  id: string,
+  dispatch: AppDispatch,
+  setLoading?: setLoadingType
+) => {
+  if (setLoading) setLoading(true);
+  // delete Doc
+  const taskRef = doc(db, taskListColl, listId, tasksColl, id);
+  await deleteDoc(taskRef);
+
+  const deletedTask = await getDoc(taskRef); // make sure
+  if (!deletedTask.exists()) {
+    // dispatch(deleteTask());
+    if (setLoading) setLoading(false);
+  }
+};
+
 const getAllTaskList = async () => {
   const id = getStorageUser().id;
   const q = query(collection(db, taskListColl), where("userId", "==", id));
@@ -322,3 +377,5 @@ const getAllTaskList = async () => {
 
   return taskList;
 };
+
+// --------------------------- TASK LIST ----------------------------------

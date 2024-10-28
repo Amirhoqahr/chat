@@ -46,6 +46,12 @@ const taskListSlice = createSlice({
         return tL;
       });
     },
+    deleteTaskList: (state, action) => {
+      const listId = action.payload;
+      state.currentTaskList = state.currentTaskList.filter(
+        (tL) => tL.id !== listId // if it's not equal to listId, then keep it
+      );
+    },
   },
 });
 
@@ -54,5 +60,6 @@ export const {
   addTaskList,
   saveTaskListTitle,
   taskListSwitchEditMode,
+  deleteTaskList,
 } = taskListSlice.actions;
 export default taskListSlice.reducer;
