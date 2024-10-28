@@ -28,6 +28,7 @@ import AvatarGenerator from "../utils/avatar";
 import {
   addTaskList,
   defaultTaskList,
+  saveTaskListTitle,
   setTaskList,
 } from "../Redux/taskListSlice";
 
@@ -283,6 +284,21 @@ export const BE_getTaskList = async (
     dispatch(setTaskList(taskList));
     setLoading(false);
   }
+};
+
+export const BE_saveTaskList = async (
+  dispatch: AppDispatch,
+  setLoading: setLoadingType,
+  listId: string,
+  title: string
+) => {
+  setLoading(true);
+  await updateDoc(doc(db, taskListColl, listId), { title });
+  const updatedTaskList = await getDoc(doc(db, taskListColl, listId));
+  dispatch(
+    saveTaskListTitle({ id: updatedTaskList.id, ...updatedTaskList.data() })
+  );
+  setLoading(false);
 };
 
 // get all users taskList
