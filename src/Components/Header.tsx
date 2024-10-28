@@ -57,7 +57,7 @@ function Header({}: Props) {
   };
 
   return (
-    <div className="flex fles-wrap sm:flex-row gap-5 items-center justify-between bg-gradient-to-r from-violet-500 border-t-orange-500 px-5 py-5 md:py-2">
+    <div className="flex fles-wrap z-10 sm:flex-row gap-5 items-center justify-between bg-gradient-to-r from-violet-500 border-t-orange-500 px-5 py-5 md:py-2">
       <img
         src={logo}
         alt="img not found"
