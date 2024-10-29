@@ -1,12 +1,22 @@
 import React from "react";
 import Task from "./Task";
+import { taskType } from "../Types";
+import FlipMove from "react-flip-move";
 
-type Props = {};
+type TasksType = {
+  tasks: taskType[];
+  listId: string;
+};
 
-export default function Tasks({}: Props) {
+export default function Tasks({ tasks, listId }: TasksType) {
   return (
     <div className="p-3 pb-5">
-      <Task />
+      <FlipMove>
+        {tasks?.map((t) => (
+          <Task key={t.id} task={t} listId={listId} />
+        ))}
+      </FlipMove>
+      {tasks.length === 0 && <p className="text-center">No task added yet!</p>}
     </div>
   );
 }

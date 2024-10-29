@@ -52,6 +52,60 @@ const taskListSlice = createSlice({
         (tL) => tL.id !== listId // if it's not equal to listId, then keep it
       );
     },
+    addTask: (state, action) => {
+      const { listId, newTask } = action.payload;
+
+      const updatedList = state.currentTaskList.map((tL) => {
+        if (tL.id === listId) {
+          // switch current task list edit mode to false if it's true
+          tL.editMode = false;
+
+          // switch of edit mode of all other tasks and collapse them
+          const tasks = tL.tasks?.map((t) => {
+            t.editMode = false;
+            t.collapsed = true;
+            return t;
+          });
+
+          // push new task in edit mode
+          tasks?.push({ ...newTask, editMode: true, collapsed: false });
+
+          tL.tasks = tasks;
+        }
+        return tL;
+      });
+
+      state.currentTaskList = updatedList;
+    },
+
+    collapseTask: (state, action) => {
+      const { listId, id } = action.payload;
+      const taskList = state.currentTaskList.find((tL) => tL.id === listId);
+      const listIdx = state.currentTaskList.findIndex((tL) => tL.id === listId);
+
+      // collapse and uncollapse task
+      taskList?.tasks?.map((t) => {
+        if (t.id === id) {
+          t.collapsed = !t.collapsed;
+        }
+      });
+
+      if (taskList) state.currentTaskList[listIdx] = taskList;
+    },
+    collapseAllTask: (state, action) => {
+      const { listId, value } = action.payload;
+      const taskList = state.currentTaskList.find((tL) => tL.id === listId);
+      const listIdx = state.currentTaskList.findIndex((tL) => tL.id === listId);
+
+      // collapse all and turn off editmode for all tasks
+      taskList?.tasks?.map((t) => {
+        t.collapsed = value !== undefined ? value : true;
+        t.editMode = false;
+        return t;
+      });
+
+      if (taskList) state.currentTaskList[listIdx] = taskList;
+    },
   },
 });
 
@@ -61,5 +115,8 @@ export const {
   saveTaskListTitle,
   taskListSwitchEditMode,
   deleteTaskList,
+  addTask,
+  collapseTask,
+  collapseAllTask,
 } = taskListSlice.actions;
 export default taskListSlice.reducer;
