@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import Icon from "./Icons";
 import {
   MdAdd,
@@ -13,6 +13,7 @@ import {
   BE_addTask,
   BE_deleteTaskList,
   BE_saveTaskList,
+  getTasksForTaskList,
 } from "../Backend/Queries";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
@@ -27,10 +28,15 @@ const SingleTaskList = forwardRef(
   ) => {
     const { id, editMode, tasks, title } = singleTaskList;
     const [homeTitle, setHomeTitel] = useState(title);
-    const dispatch = useDispatch<AppDispatch>();
     const [saveLoading, setSaveLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [addTaskLoading, setAddTaskLoading] = useState(false);
+    const [tasksLoading, setTasksLoading] = useState(false);
+    const dispatch = useDispatch<AppDispatch>();
+
+    useEffect(() => {
+      if (id) getTasksForTaskList(dispatch, id, setTasksLoading);
+    }, [dispatch, id]);
     const handleSaveTaskListTitle = () => {
       if (id) BE_saveTaskList(dispatch, setSaveLoading, id, homeTitle);
     };

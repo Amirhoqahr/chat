@@ -41,6 +41,7 @@ import {
   saveTask,
   saveTaskListTitle,
   setTaskList,
+  setTaskListTasks,
 } from "../Redux/taskListSlice";
 
 // Collection Names
@@ -436,4 +437,29 @@ export const BE_saveTask = async (
     } else toast.error("BE_saveTask: updated task not found");
   } else toast.error("BE_saveTask: id not found");
 };
+export const getTasksForTaskList = async (
+  dispatch: AppDispatch,
+  listId: string,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+  const tasksRef = collection(db, taskListColl, listId, tasksColl);
+  const tasksSnapShot = await getDocs(tasksRef);
+  const tasks: taskType[] = [];
+  if (!tasksSnapShot.empty) {
+    tasksSnapShot.forEach((task) => {
+      const { title, description } = task.data();
+      tasks.push({
+        id: task.id,
+        title,
+        description,
+        editMode: false,
+        collapsed: true,
+      });
+    });
+  }
+  dispatch(setTaskListTasks({ listId, tasks }));
+  setLoading(false);
+};
+
 // --------------------------- TASK ----------------------------------

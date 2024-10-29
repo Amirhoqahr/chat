@@ -143,6 +143,18 @@ const taskListSlice = createSlice({
 
       state.currentTaskList = updatedTaskList;
     },
+    setTaskListTasks: (state, action) => {
+      const { listId, tasks } = action.payload;
+
+      const taskList = state.currentTaskList.map((tL) => {
+        if (tL.id === listId) {
+          tL.tasks = tasks;
+        }
+        return tL;
+      });
+
+      state.currentTaskList = taskList;
+    },
   },
 });
 
@@ -157,5 +169,6 @@ export const {
   collapseTask,
   collapseAllTask,
   taskSwitchEditMode,
+  setTaskListTasks,
 } = taskListSlice.actions;
 export default taskListSlice.reducer;
