@@ -132,7 +132,7 @@ export const BE_signIn = (
 };
 
 // logout a user
-export const BE_signOut = (
+export const BE_signOut = async (
   dispatch: AppDispatch,
   goTo: NavigateFunction,
   setLoading: setLoadingType,
@@ -140,10 +140,14 @@ export const BE_signOut = (
 ) => {
   setLoading(true);
   // logout in firebase
+
+  // it must be before signOut because in Firebase Rules we have seid that only
+  // authenticated users may read/write collections, so after signOut will lose
+  // user's auth so updateUserInfo will fail
+  if (!deleteAcc) await updateUserInfo({ isOffline: true });
   signOut(auth)
     .then(async () => {
       // set user offline
-      if (!deleteAcc) await updateUserInfo({ isOffline: true });
 
       // set currentSelected user to empty user
       dispatch(setUser(defaultUser));
@@ -178,7 +182,6 @@ export const BE_saveProfile = async (
 
   if (id) {
     // update email if present
-    // You can also get the currently signed-in user by using the currentUser property. If a user isn't signed in, currentUser is null:
     if (email && auth.currentUser) {
       updateEmail(auth.currentUser, email)
         .then(() => {
