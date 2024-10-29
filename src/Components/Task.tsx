@@ -4,8 +4,8 @@ import { MdDelete, MdEdit, MdSave } from "react-icons/md";
 import { taskType } from "../Types";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
-import { collapseTask } from "../Redux/taskListSlice";
-import { BE_deleteTask } from "../Backend/Queries";
+import { collapseTask, taskSwitchEditMode } from "../Redux/taskListSlice";
+import { BE_deleteTask, BE_saveTask } from "../Backend/Queries";
 
 type TaskType = {
   task: taskType;
@@ -32,7 +32,7 @@ const Task = forwardRef(
       };
       console.log(taskData);
       // save func
-      // BE_saveTask(dispatch, listId, taskData, setSaveLoading);
+      BE_saveTask(dispatch, listId, taskData, setSaveLoading);
     };
 
     const handleDelete = () => {
@@ -78,8 +78,10 @@ const Task = forwardRef(
 
               <div className="flex justify-end">
                 <Icon
-                  onClick={
-                    () => (editMode ? handleSave() : null) //dispatch(taskSwitchEditMode({ listId, id }))
+                  onClick={() =>
+                    editMode
+                      ? handleSave()
+                      : dispatch(taskSwitchEditMode({ listId, id }))
                   }
                   IconName={editMode ? MdSave : MdEdit}
                   loading={editMode && saveLoading}

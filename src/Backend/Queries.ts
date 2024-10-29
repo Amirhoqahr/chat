@@ -38,6 +38,7 @@ import {
   defaultTask,
   defaultTaskList,
   deleteTaskList,
+  saveTask,
   saveTaskListTitle,
   setTaskList,
 } from "../Redux/taskListSlice";
@@ -412,4 +413,27 @@ export const BE_addTask = async (
   }
 };
 
+// update task
+export const BE_saveTask = async (
+  dispatch: AppDispatch,
+  listId: string,
+  data: taskType,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+  const { id, title, description } = data;
+
+  if (id) {
+    const taskRef = doc(db, taskListColl, listId, tasksColl, id);
+    await updateDoc(taskRef, { title, description });
+
+    const updatedTask = await getDoc(taskRef);
+
+    if (updatedTask.exists()) {
+      setLoading(false);
+      // dispatch
+      dispatch(saveTask({ listId, id: updatedTask.id, ...updatedTask.data() }));
+    } else toast.error("BE_saveTask: updated task not found");
+  } else toast.error("BE_saveTask: id not found");
+};
 // --------------------------- TASK ----------------------------------
