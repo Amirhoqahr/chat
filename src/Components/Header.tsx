@@ -33,8 +33,9 @@ function Header({}: Props) {
   }, [dispatch, goTo]);
 
   useEffect(() => {
-    // const page = getCurrentPage();
-    // if (page) goTo("/dashboard/" + page);
+    const page = getCurrentPage();
+    if (page) goTo("/dashboard/" + page);
+
     // const get = async () => {
     //   if (usr?.id) await BE_getChats(dispatch);
     // };

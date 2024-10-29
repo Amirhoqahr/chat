@@ -151,7 +151,7 @@ export const BE_signOut = async (
       localStorage.removeItem(userStorageName);
 
       // route to auth page
-      goTo("/");
+      goTo("/auth");
 
       setLoading(false);
     })
