@@ -37,6 +37,7 @@ import {
   addTaskList,
   defaultTask,
   defaultTaskList,
+  deleteTask,
   deleteTaskList,
   saveTask,
   saveTaskListTitle,
@@ -343,6 +344,10 @@ export const BE_deleteTaskList = async (
   }
 };
 
+// --------------------------- TASK LIST ----------------------------------
+
+// --------------------------- TASK ----------------------------------
+
 export const BE_deleteTask = async (
   listId: string,
   id: string,
@@ -350,14 +355,16 @@ export const BE_deleteTask = async (
   setLoading?: setLoadingType
 ) => {
   if (setLoading) setLoading(true);
-  // delete Doc
+
+  // delete doc
   const taskRef = doc(db, taskListColl, listId, tasksColl, id);
   await deleteDoc(taskRef);
 
-  const deletedTask = await getDoc(taskRef); // make sure
+  const deletedTask = await getDoc(taskRef);
+
   if (!deletedTask.exists()) {
-    // dispatch(deleteTask());
     if (setLoading) setLoading(false);
+    dispatch(deleteTask({ listId, id }));
   }
 };
 
@@ -382,9 +389,6 @@ const getAllTaskList = async () => {
   return taskList;
 };
 
-// --------------------------- TASK LIST ----------------------------------
-
-// --------------------------- TASK ----------------------------------
 export const BE_addTask = async (
   dispatch: AppDispatch,
   listId: string,
