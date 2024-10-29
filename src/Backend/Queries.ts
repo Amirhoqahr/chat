@@ -1,9 +1,11 @@
 import { toast } from "react-toastify";
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
+  updateEmail,
+  updatePassword,
 } from "firebase/auth";
 import CatchErr from "../utils/catchErr";
 import { auth, db } from "./firebase";
@@ -115,7 +117,7 @@ export const BE_signIn = (
       updateUserInfo({ id: user.uid, isOnline: true });
 
       // get user information
-      const userInfo = await getUserData(user.uid);
+      const userInfo = await getUserInfo(user.uid);
       dispatch(setUser(userInfo)); // بفرست تو رداکس
 
       toast.success("Logged in successfully");
@@ -130,24 +132,23 @@ export const BE_signIn = (
 };
 
 // logout a user
-export const BE_signOut = async (
+export const BE_signOut = (
   dispatch: AppDispatch,
   goTo: NavigateFunction,
-  setLoading: setLoadingType
+  setLoading: setLoadingType,
+  deleteAcc?: boolean
 ) => {
   setLoading(true);
   // logout in firebase
-
-  // it must be before signOut because in Firebase Rules we have seid that only
-  // authenticated users may read/write collections, so after signOut will lose
-  // user's auth so updateUserInfo will fail
-  await updateUserInfo({ isOffline: true });
   signOut(auth)
     .then(async () => {
+      // set user offline
+      if (!deleteAcc) await updateUserInfo({ isOffline: true });
+
       // set currentSelected user to empty user
       dispatch(setUser(defaultUser));
 
-      // // remove from local storage
+      // remove from local storage
       localStorage.removeItem(userStorageName);
 
       // route to auth page
@@ -162,6 +163,91 @@ export const getStorageUser = () => {
   const user = localStorage.getItem(userStorageName);
   if (user) return JSON.parse(user);
   else return null;
+};
+
+// save user profile
+export const BE_saveProfile = async (
+  dispatch: AppDispatch,
+  data: { email: string; username: string; password: string; img: string },
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+
+  const { email, username, password, img } = data;
+  const id = getStorageUser().id;
+
+  if (id) {
+    // update email if present
+    // You can also get the currently signed-in user by using the currentUser property. If a user isn't signed in, currentUser is null:
+    if (email && auth.currentUser) {
+      updateEmail(auth.currentUser, email)
+        .then(() => {
+          toast.success("Email updated successfully!");
+        })
+        .catch((err) => CatchErr(err));
+    }
+
+    // update passsword if present
+    if (password && auth.currentUser) {
+      updatePassword(auth.currentUser, password)
+        .then(() => {
+          toast.success("Password updated successfully!");
+        })
+        .catch((err) => CatchErr(err));
+    }
+
+    // update user collection only if username or img is present
+    if (username || img) {
+      await updateUserInfo({ username, img });
+      toast.success("Updated profile successfully!");
+    }
+
+    // get user latest info
+    const userInfo = await getUserInfo(id);
+
+    // update user in state or store
+    dispatch(setUser(userInfo));
+    setLoading(false);
+  } else toast.error("BE_saveProfile: id not found");
+};
+
+// delete account
+export const BE_deleteAccount = async (
+  dispatch: AppDispatch,
+  goTo: NavigateFunction,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+
+  if (getStorageUser().id) {
+    // get all taskList
+    const userTaskList = await getAllTaskList();
+
+    // loop through user tasklist and delete each
+    if (userTaskList.length > 0) {
+      userTaskList.forEach(async (tL) => {
+        if (tL.id && tL.tasks)
+          await BE_deleteTaskList(tL.id, tL.tasks, dispatch);
+      });
+    }
+
+    // delete the user info from collection
+    await deleteDoc(doc(db, usersColl, getStorageUser().id));
+
+    // finally delete user account
+    const user = auth.currentUser;
+
+    console.log("USER TO BE DELETED", user);
+
+    if (user) {
+      deleteUser(user)
+        .then(async () => {
+          BE_signOut(dispatch, goTo, setLoading, true);
+          //window.location.reload();
+        })
+        .catch((err) => CatchErr(err));
+    }
+  }
 };
 
 // add user to collection
@@ -182,24 +268,26 @@ async function addUserToCollection(
     lastSeen: serverTimestamp(),
     bio: "My Bio",
   });
-  return getUserData(id);
+  return getUserInfo(id);
 }
 
 // get user information
-async function getUserData(id: string): Promise<userType> {
-  const docRef = doc(db, usersColl, id);
-  const theUser = await getDoc(docRef);
-  if (theUser.exists()) {
+export const getUserInfo = async (
+  id: string,
+  setLoading?: setLoadingType
+): Promise<userType> => {
+  if (setLoading) setLoading(true);
+  const userRef = doc(db, usersColl, id);
+  const user = await getDoc(userRef);
+
+  if (user.exists()) {
     const { img, isOnline, username, email, bio, creationTime, lastSeen } =
-      theUser.data();
-    // console.log(
-    //   creationTime,
-    //   lastSeen,
-    //   creationTime.toDate(),
-    //   lastSeen.toDate()
-    // );
+      user.data();
+
+    if (setLoading) setLoading(false);
+
     return {
-      id: theUser.id,
+      id: user.id,
       img,
       isOnline,
       username,
@@ -207,15 +295,17 @@ async function getUserData(id: string): Promise<userType> {
       bio,
       creationTime: creationTime
         ? ConvertTime(creationTime.toDate())
-        : "no date yet: userInfo",
+        : "no date yet: userinfo",
       lastSeen: lastSeen
         ? ConvertTime(lastSeen.toDate())
-        : "no date yet: userInfo",
+        : "no date yet: userinfo",
     };
   } else {
+    if (setLoading) setLoading(false);
+    toast.error("getUserInfo: user not found");
     return defaultUser;
   }
-}
+};
 
 // update user info
 const updateUserInfo = async ({
@@ -246,18 +336,6 @@ const updateUserInfo = async ({
     });
   }
 };
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in
-    console.log("User is signed in:", user.uid);
-    console.log("auth:    ", auth);
-    // Access user data (e.g., user.email, user.displayName)
-  } else {
-    // User is signed out
-    console.log("User is signed out");
-  }
-});
 
 // --------------------------- TASK LIST ----------------------------------
 
@@ -321,11 +399,10 @@ export const BE_deleteTaskList = async (
   listId: string,
   tasks: taskType[],
   dispatch: AppDispatch,
-  setLoading: setLoadingType
+  setLoading?: setLoadingType
 ) => {
-  setLoading(true);
+  if (setLoading) setLoading(true);
 
-  // FireBase does NOT automatically delete the subcollections so we have to do that manually
   // looping through tasks and deleting each
   if (tasks.length > 0) {
     for (let i = 0; i < tasks.length; i++) {
@@ -337,10 +414,13 @@ export const BE_deleteTaskList = async (
   // delete task list board
   const listRef = doc(db, taskListColl, listId);
   await deleteDoc(listRef);
-  const deletedTaskList = await getDoc(listRef); // make sure
+
+  const deletedTaskList = await getDoc(listRef);
+
   if (!deletedTaskList.exists()) {
+    if (setLoading) setLoading(false);
+    // update state
     dispatch(deleteTaskList(listId));
-    setLoading(false);
   }
 };
 
