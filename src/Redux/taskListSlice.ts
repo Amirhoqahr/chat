@@ -2,17 +2,21 @@ import { createSlice } from "@reduxjs/toolkit";
 import { taskListType, taskType } from "../Types";
 
 export const defaultTaskList: taskListType = {
-  title: "sample task list",
+  title: "Sample Task List",
 };
 export const defaultTask: taskType = {
-  title: "Do it at 9 am",
-  description: "description here",
+  title: "I'll do this at 9:00am",
+  description: "This is what I'll need to do in order to finish this",
 };
 
 type taskListSliceType = {
   currentTaskList: taskListType[];
 };
-const initialState: taskListSliceType = { currentTaskList: [] };
+
+const initialState: taskListSliceType = {
+  currentTaskList: [],
+};
+
 const taskListSlice = createSlice({
   name: "taskList",
   initialState,
@@ -38,7 +42,6 @@ const taskListSlice = createSlice({
     },
     taskListSwitchEditMode: (state, action) => {
       const { id, value } = action.payload;
-      console.log(id);
       state.currentTaskList = state.currentTaskList.map((tL) => {
         if (tL.id === id) {
           tL.editMode = value !== undefined ? value : true;
@@ -49,7 +52,7 @@ const taskListSlice = createSlice({
     deleteTaskList: (state, action) => {
       const listId = action.payload;
       state.currentTaskList = state.currentTaskList.filter(
-        (tL) => tL.id !== listId // if it's not equal to listId, then keep it
+        (tL) => tL.id !== listId
       );
     },
     addTask: (state, action) => {
@@ -77,7 +80,6 @@ const taskListSlice = createSlice({
 
       state.currentTaskList = updatedList;
     },
-
     collapseTask: (state, action) => {
       const { listId, id } = action.payload;
       const taskList = state.currentTaskList.find((tL) => tL.id === listId);
@@ -106,7 +108,6 @@ const taskListSlice = createSlice({
 
       if (taskList) state.currentTaskList[listIdx] = taskList;
     },
-
     taskSwitchEditMode: (state, action) => {
       const { listId, id, value } = action.payload;
 
@@ -156,7 +157,6 @@ const taskListSlice = createSlice({
 
       state.currentTaskList = taskList;
     },
-
     deleteTask: (state, action) => {
       const { listId, id } = action.payload;
 
@@ -179,11 +179,12 @@ export const {
   taskListSwitchEditMode,
   deleteTaskList,
   addTask,
-  saveTask,
   collapseTask,
-  collapseAllTask,
   taskSwitchEditMode,
+  saveTask,
   setTaskListTasks,
   deleteTask,
+  collapseAllTask,
 } = taskListSlice.actions;
+
 export default taskListSlice.reducer;
