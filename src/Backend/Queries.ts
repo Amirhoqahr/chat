@@ -11,6 +11,8 @@ import CatchErr from "../utils/catchErr";
 import { auth, db } from "./firebase";
 import {
   authDataType,
+  chatType,
+  messageType,
   setLoadingType,
   taskListType,
   taskType,
@@ -19,18 +21,28 @@ import {
 import { NavigateFunction } from "react-router-dom";
 import {
   addDoc,
+  and,
   collection,
   deleteDoc,
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
+  or,
+  orderBy,
   query,
   serverTimestamp,
   setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
-import { defaultUser, setUser, userStorageName } from "../Redux/userSlice";
+import {
+  defaultUser,
+  setAlertProps,
+  setUser,
+  setUsers,
+  userStorageName,
+} from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import ConvertTime from "../utils/convertTime";
 import AvatarGenerator from "../utils/avatar";
@@ -46,6 +58,7 @@ import {
   setTaskList,
   setTaskListTasks,
 } from "../Redux/taskListSlice";
+import { setChats, setCurrentMessages } from "../Redux/chatsSlice";
 
 // Collection Names
 const usersColl = "users";
@@ -273,6 +286,46 @@ async function addUserToCollection(
   });
   return getUserInfo(id);
 }
+
+// get all users
+export const BE_getAllUsers = async (
+  dispatch: AppDispatch,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+
+  // get all users except the current signin one, those online ontop
+  const q = query(collection(db, usersColl), orderBy("isOnline", "desc"));
+  onSnapshot(q, (usersSnapshot) => {
+    let users: userType[] = [];
+
+    usersSnapshot.forEach((user) => {
+      const { img, isOnline, username, email, bio, creationTime, lastSeen } =
+        user.data();
+      users.push({
+        id: user.id,
+        img,
+        isOnline,
+        username,
+        email,
+        bio,
+        creationTime: creationTime
+          ? ConvertTime(creationTime.toDate())
+          : "no date yet: all users creation time",
+        lastSeen: lastSeen
+          ? ConvertTime(lastSeen.toDate())
+          : "no date yet: all users lastseen",
+      });
+    });
+
+    // take out the current user
+    const id = getStorageUser().id;
+    if (id) {
+      dispatch(setUsers(users.filter((u) => u.id !== id)));
+    }
+    setLoading(false);
+  });
+};
 
 // get user information
 export const getUserInfo = async (
@@ -550,3 +603,183 @@ export const getTasksForTaskList = async (
 };
 
 // --------------------------- TASK ----------------------------------
+
+// -------------------------------- FOR CHATS -------------------------------
+
+// start a chat
+export const BE_startChat = async (
+  dispatch: AppDispatch,
+  rId: string,
+  rName: string,
+  setLoading: setLoadingType
+) => {
+  const sId = getStorageUser().id;
+  setLoading(true);
+
+  // check if chat exists first
+  const q = query(
+    collection(db, chatsColl),
+    or(
+      and(where("senderId", "==", sId), where("recieverId", "==", rId)),
+      and(where("senderId", "==", rId), where("recieverId", "==", sId))
+    )
+  );
+  const res = await getDocs(q);
+
+  // if you find no chat with this two ids then create one
+  if (res.empty) {
+    const newChat = await addDoc(collection(db, chatsColl), {
+      senderId: sId,
+      recieverId: rId,
+      lastMsg: "",
+      updatedAt: serverTimestamp(),
+      senderToRecieverNewMsgCount: 0,
+      recieverToSenderNewMsgCount: 0,
+    });
+
+    const newChatSnapshot = await getDoc(doc(db, newChat.path));
+
+    if (!newChatSnapshot.exists()) {
+      toast.error("BE_startChat: No such document");
+    }
+    setLoading(false);
+    dispatch(setAlertProps({ open: false }));
+  } else {
+    toast.error("You already started chatting with " + rName);
+    setLoading(false);
+    dispatch(setAlertProps({ open: false }));
+  }
+};
+
+// get users chats
+export const BE_getChats = async (dispatch: AppDispatch) => {
+  const id = getStorageUser().id;
+
+  const q = query(
+    collection(db, chatsColl),
+    or(where("senderId", "==", id), where("recieverId", "==", id)),
+    orderBy("updatedAt", "desc")
+  );
+
+  onSnapshot(q, (chatSnapshot) => {
+    const chats: chatType[] = [];
+
+    chatSnapshot.forEach((chat) => {
+      const {
+        senderId,
+        recieverId,
+        lastMsg,
+        updatedAt,
+        recieverToSenderNewMsgCount,
+        senderToRecieverNewMsgCount,
+      } = chat.data();
+
+      chats.push({
+        id: chat.id,
+        senderId,
+        recieverId,
+        lastMsg,
+        updatedAt,
+        recieverToSenderNewMsgCount,
+        senderToRecieverNewMsgCount,
+      });
+    });
+
+    console.log("CHATS", chats);
+    dispatch(setChats(chats));
+  });
+};
+
+// get users messages
+export const BE_getMsgs = async (
+  dispatch: AppDispatch,
+  chatId: string,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+
+  const q = query(
+    collection(db, chatsColl, chatId, messagesColl),
+    orderBy("createdAt", "asc")
+  );
+
+  onSnapshot(q, (messagesSnapshot) => {
+    let msgs: messageType[] = [];
+
+    messagesSnapshot.forEach((msg) => {
+      const { senderId, content, createdAt } = msg.data();
+      msgs.push({
+        id: msg.id,
+        senderId,
+        content,
+        createdAt: createdAt
+          ? ConvertTime(createdAt.toDate())
+          : "no date yet: all messages",
+      });
+    });
+
+    dispatch(setCurrentMessages(msgs));
+    setLoading(false);
+  });
+};
+
+// get users messages
+export const BE_sendMsgs = async (
+  chatId: string,
+  data: messageType,
+  setLoading: setLoadingType
+) => {
+  setLoading(true);
+
+  const res = await addDoc(collection(db, chatsColl, chatId, messagesColl), {
+    ...data,
+    createdAt: serverTimestamp(),
+  });
+
+  const newMsg = await getDoc(doc(db, res.path));
+  if (newMsg.exists()) {
+    setLoading(false);
+    // reset new message count
+    await updateNewMsgCount(chatId, true);
+    await updateLastMsg(chatId, newMsg.data().content);
+    await updateUserInfo({}); // update last seen
+  }
+};
+
+// function to check if I created a chat
+export const iCreatedChat = (senderId: string) => {
+  const myId = getStorageUser().id;
+  return myId === senderId;
+};
+
+// updat new message count for user
+export const updateNewMsgCount = async (chatId: string, reset?: boolean) => {
+  const chat = await getDoc(doc(db, chatsColl, chatId));
+
+  let senderToRecieverNewMsgCount = chat.data()?.senderToRecieverNewMsgCount;
+  let recieverToSenderNewMsgCount = chat.data()?.recieverToSenderNewMsgCount;
+
+  if (iCreatedChat(chat.data()?.senderId)) {
+    if (reset) recieverToSenderNewMsgCount = 0;
+    else senderToRecieverNewMsgCount++;
+  } else {
+    if (reset) senderToRecieverNewMsgCount = 0;
+    else recieverToSenderNewMsgCount++;
+  }
+
+  await updateDoc(doc(db, chatsColl, chatId), {
+    updatedAt: serverTimestamp(),
+    senderToRecieverNewMsgCount,
+    recieverToSenderNewMsgCount,
+  });
+};
+
+// update last message
+const updateLastMsg = async (chatId: string, lastMsg: string) => {
+  await updateNewMsgCount(chatId);
+  // await message count here
+  await updateDoc(doc(db, chatsColl, chatId), {
+    lastMsg,
+    updatedAt: serverTimestamp(),
+  });
+};
