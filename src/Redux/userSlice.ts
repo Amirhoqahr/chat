@@ -13,11 +13,25 @@ export const defaultUser: userType = {
   lastSeen: "",
   bio: "",
 };
+type userStateType = {
+  users: userType[];
+  currentUser: userType;
+  alertProps: {
+    open: boolean;
+    recieverId: string;
+    recieverName: string;
+  };
+};
 
-const initialState = {
-  // user: [],
+const initialState: userStateType = {
+  users: [],
   currentUser: defaultUser,
-  // currentSelectedUser: null,
+  alertProps: {
+    open: false,
+    recieverId: "",
+    recieverName: "",
+  },
+  // currentSelectedUser:null
 };
 
 const userSlice = createSlice({
@@ -25,14 +39,30 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      console.log(action);
       const user = action.payload;
+
+      // store user in local storage
       localStorage.setItem(userStorageName, JSON.stringify(user));
+
+      // set loged in user
       state.currentUser = user;
     },
-    setUsers: (state, action) => {},
+    setUsers: (state, action) => {
+      // set all users
+      state.users = action.payload;
+    },
+    setAlertProps: (state, action) => {
+      const { open, recieverId, recieverName } = action.payload;
+
+      state.alertProps = {
+        open,
+        recieverId: recieverId || "",
+        recieverName: recieverName || "",
+      };
+    },
   },
 });
 
-export const { setUser, setUsers } = userSlice.actions;
+export const { setUser, setUsers, setAlertProps } = userSlice.actions;
+
 export default userSlice.reducer;
