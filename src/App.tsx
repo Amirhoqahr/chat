@@ -13,6 +13,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<LoginPage />}></Route>
+          <Route path="/" element={<LoginPage />}></Route>
           <Route path="/dashboard" element={<Layout />}>
             <Route index element={<ListPage />}></Route>
             <Route path="chat" element={<ChatPage />}></Route>
