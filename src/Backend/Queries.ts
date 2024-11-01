@@ -85,7 +85,9 @@ export const BE_signUp = (
         .then(async ({ user }) => {
           // generate user avatar with username
           // const imgLink = AvatarGenerator(user.email?.split("@")[0]); //the api multiavatar is sometimes down!
-          const imgLink = AvatarGenerator("test2");
+          const imgLink = AvatarGenerator(
+            `test2 ${Math.floor(Math.random() * 2) + 1}`
+          );
 
           const userInfo = await addUserToCollection(
             user.uid,
