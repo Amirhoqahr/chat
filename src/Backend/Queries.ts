@@ -67,7 +67,6 @@ const taskListColl = "taskList";
 const chatsColl = "chats";
 const messagesColl = "messages";
 
-// register a user
 export const BE_signUp = (
   data: authDataType,
   setLoading: setLoadingType,
@@ -77,40 +76,37 @@ export const BE_signUp = (
 ) => {
   const { email, password, confirmPassword } = data;
 
-  if (email && password && confirmPassword) {
+  // loading true
+  setLoading(true);
+
+  if (email && password) {
     if (password === confirmPassword) {
-      setLoading(true);
       createUserWithEmailAndPassword(auth, email, password)
-        .then(async (userCredential) => {
-          // Signed up
-          // TODO: create user image
-          const user = userCredential.user;
-          toast.success("Account created successfully");
-          setLoading(false);
-          reset();
-          goTo("/dashboard");
-          const username = user.email?.split("@")[0] || "";
+        .then(async ({ user }) => {
+          // generate user avatar with username
+          // const imgLink = AvatarGenerator(user.email?.split("@")[0]); //the api multiavatar is sometimes down!
+          const imgLink = AvatarGenerator("test2");
+
           const userInfo = await addUserToCollection(
             user.uid,
             user.email || "",
-            username,
-            AvatarGenerator(username) //img
+            user.email?.split("@")[0] || "",
+            imgLink
           );
-          // TODO: set user info in store and local storage
-          // dispatch(setUser);
-          dispatch(setUser(userInfo)); // بفرست تو رداکس
+
+          // set user in store
+          dispatch(setUser(userInfo));
+
+          setLoading(false);
+          reset();
+          goTo("/dashboard");
         })
-        .catch((error) => {
-          CatchErr(error);
+        .catch((err) => {
+          CatchErr(err);
           setLoading(false);
         });
-    } else {
-      // console.log("password and confirm don't match")
-      toast.error("password and confirm don't match");
-    }
-  } else {
-    toast.error("Fields shouldn't be empty");
-  }
+    } else toast.error("Passwords must match!");
+  } else toast.error("Fields shouldn't be left empty!");
 };
 
 // login a user
