@@ -9,7 +9,7 @@ function Chats() {
 
   return chats.length === 0 ? (
     <div className="p-10">
-      No chats yet for you, chose a user and start chatting!
+      No chats yet for you, chosse a user and start chatting!
     </div>
   ) : (
     <>

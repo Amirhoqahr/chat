@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import ChatArea from "../Components/ChatArea";
 import SidebarRight from "../Components/SidebarRight";
-const nochat = require("../Assets/nochat.jpg");
+const nochat = require("../Assets/noChatFound.jpg");
 
 function ChatPage() {
   const currentSelectedChat = useSelector(
