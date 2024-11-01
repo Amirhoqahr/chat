@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { start } from "repl";
 import { RootState } from "../Redux/store";
 import { useNavigate } from "react-router-dom";
-import { BE_signOut, getStorageUser } from "../Backend/Queries";
+import { BE_getChats, BE_signOut, getStorageUser } from "../Backend/Queries";
 import Spinner from "./Spinner";
 import { setUser } from "../Redux/userSlice";
 
@@ -36,10 +36,10 @@ function Header({}: Props) {
     const page = getCurrentPage();
     if (page) goTo("/dashboard/" + page);
 
-    // const get = async () => {
-    //   if (usr?.id) await BE_getChats(dispatch);
-    // };
-    // get();
+    const get = async () => {
+      if (usr?.id) await BE_getChats(dispatch);
+    };
+    get();
   }, [goTo]);
 
   const handleSignOut = () => {
